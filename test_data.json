@@ -1,0 +1,96 @@
+[
+  {
+    "id": 1,
+    "description": "Routine file translation — complete request",
+    "input": "Hi, can you translate the attached release notes into French and German by Friday? https://drive.google.com/file/releasenotes",
+    "expected_intent": "new_request",
+    "expected_action": "ack",
+    "expected_fields": {
+      "type": "file translation",
+      "languages": ["fr", "de"],
+      "deadline": "Friday",
+      "needs_human": false,
+      "missing_info": []
+    },
+    "notes": "Baseline happy path. All required fields present. Should auto-route to translator with no escalation."
+  },
+  {
+    "id": 2,
+    "description": "Routine translation — missing info (vague request)",
+    "input": "Please translate this.",
+    "expected_intent": "new_request",
+    "expected_action": "ask_info",
+    "expected_fields": {
+      "needs_human": false,
+      "missing_info": ["target language", "source file or text"]
+    },
+    "notes": "Most common stakeholder mistake. Bot should ask for missing details, not escalate."
+  },
+  {
+    "id": 3,
+    "description": "Complex engineering request — new undefined workflow",
+    "input": "We need to stand up a brand-new MT post-editing workflow for our docs team across 6 languages, with QA gates and reviewer assignment. Where do we start?",
+    "expected_intent": "new_request",
+    "expected_action": "escalate",
+    "expected_fields": {
+      "needs_human": true,
+      "type": "MT workflow setup"
+    },
+    "notes": "Core human-in-the-loop case. Complex engineering work requiring loc engineer judgment. Should escalate regardless of missing details."
+  },
+  {
+    "id": 4,
+    "description": "Urgent request — certified legal translation",
+    "input": "URGENT: we have a legal contract that needs certified Spanish translation today for a client signing. https://drive.google.com/file/contract_final",
+    "expected_intent": "new_request",
+    "expected_action": "escalate",
+    "expected_fields": {
+      "priority": "urgent",
+      "languages": ["es"],
+      "deadline": "today"
+    },
+    "notes": "Urgency alone should trigger escalation even for a routine translation type. Tests priority-based routing."
+  },
+  {
+    "id": 5,
+    "description": "Status query — requester checking their open tickets",
+    "input": "What's the status of my requests?",
+    "expected_intent": "status_query",
+    "expected_action": "status",
+    "expected_fields": {},
+    "notes": "Standard status check. Bot should return open tickets for this requester, or a 'no open requests' message."
+  },
+  {
+    "id": 6,
+    "description": "Multi-language request — partial info",
+    "input": "We need the onboarding guide localized for our APAC launch. Target markets are Japan, Korea, and Thailand. No hard deadline yet but ideally before end of quarter.",
+    "expected_intent": "new_request",
+    "expected_action": "ask_info",
+    "expected_fields": {
+      "languages": ["ja", "ko", "th"],
+      "missing_info": ["source file or link"]
+    },
+    "notes": "Languages and rough deadline present but source file missing. Tests partial-info handling on a multi-language request."
+  },
+  {
+    "id": 7,
+    "description": "Unknown request type — tests flexibility requirement",
+    "input": "We need to set up a live glossary sync between our TMS (Phrase) and our CMS (Contentful) so translators always pull the latest approved terms automatically.",
+    "expected_intent": "new_request",
+    "expected_action": "escalate",
+    "expected_fields": {
+      "needs_human": true,
+      "type": "TMS/CMS integration"
+    },
+    "notes": "Request type never seen before. No hardcoded rules cover it. Tests that the LLM triage classifies novel types correctly and flags for human review. Key demo case for the flexibility requirement."
+  },
+  {
+    "id": 8,
+    "description": "Off-topic / greeting — help response",
+    "input": "Hi, what can you help me with?",
+    "expected_intent": "other",
+    "expected_action": "help",
+    "expected_fields": {},
+    "notes": "Non-request message. Bot should return the help/welcome message without creating a ticket."
+  }
+]
